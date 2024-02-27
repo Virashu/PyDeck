@@ -1,0 +1,101 @@
+"""Plugin manager"""
+
+
+import os
+import pathlib
+import typing as t
+import importlib.util
+import sys
+
+from pydeck.plugin import DeckPlugin
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _load_module(module_name: str, plugins_path: str) -> type | None:
+    if pathlib.Path(f"{plugins_path}/{module_name}").is_dir():
+        module_path = f"{plugins_path}/{module_name}/__init__.py"
+
+    elif pathlib.Path(f"{plugins_path}/{module_name}").is_file():
+        module_path = f"{plugins_path}/{module_name}"
+
+    else:
+        return None
+
+    _spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if not _spec:
+        return None
+    _module = importlib.util.module_from_spec(_spec)
+    sys.modules[module_name] = _module
+    if not _spec.loader:
+        return None
+    _spec.loader.exec_module(_module)
+
+    if not hasattr(_module, "Main"):
+        logger.warning("Plugin '%s' has wrong structure", module_name)
+        return None
+
+    return _module.Main
+
+
+class PluginManager:
+    """Plugin manager
+
+    Loads plugins"""
+
+    plugins: list[DeckPlugin]
+    plugin_dir: str
+
+    def __init__(self, plugin_dir: str) -> None:
+        self.plugin_dir = plugin_dir
+        self.plugins = []
+
+    def load(self) -> None:
+        """Load plugins & execute them"""
+
+        packages = os.listdir(self.plugin_dir)
+
+        for plugin in packages:
+            if plugin.startswith("_"):
+                continue
+            # plugin_module = __import__(f"pydeck.plugins.{plugin}")
+            plugin_main: type | None = _load_module(plugin, self.plugin_dir)
+            # self.plugins.append(plugin_module.Main())
+            if plugin_main:
+                obj = plugin_main()
+                obj.load()
+                self.plugins.append(obj)
+            else:
+                logger.warning("Plugin '%s' not found", plugin)
+
+    def update(self) -> None:
+        """Update plugins"""
+
+        for plugin in self.plugins:
+            plugin.update()
+
+    @property
+    def variables(self) -> dict[str, t.Any]:
+        """Get variables from plugins"""
+
+        variables: dict[str, t.Any] = {}
+
+        for plugin in self.plugins:
+            prefix = plugin.plugin_prefix
+            variables.update({f"{prefix}_{k}": v for k, v in plugin.variables.items()})
+
+        return variables
+
+    @property
+    def actions(self) -> dict[str, t.Any]:
+        """Get actions from plugins"""
+
+        actions: dict[str, t.Any] = {}
+
+        for plugin in self.plugins:
+            prefix = plugin.plugin_prefix
+            actions.update({f"{prefix}_{k}": v for k, v in plugin.actions.items()})
+
+        return actions
