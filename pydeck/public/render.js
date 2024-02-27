@@ -11,6 +11,10 @@ class Button {
     this.id = `${this.row}:${this.col}`;
     this.text = text;
   }
+
+  /* Render the button
+   * @returns {string}
+  **/
   render() {
     return `
       <div
@@ -20,7 +24,21 @@ class Button {
       >
         ${this.text}
       </div>
-    `
+    `;
+  }
+
+  renderHtml() {
+    divElement = document.createElement("div");
+    divElement.classList.add("deck-button");
+    divElement.style.gridColumn = this.col + 1;
+    divElement.style.gridRow = this.row + 1;
+    divElement.innerHTML = this.text;
+
+    divElement.onclick = () => {
+      deck_click(this.id);
+    }
+
+    return divElement;
   }
 }
 
@@ -65,9 +83,11 @@ function deck_click(button_id) {
 
 function renderScreen() {
   let rendered = `
-    <div class="deck"><div class="deck-button-container">
-    ${buttons.map((button) => button.render()).join("")}
-    </div></div>
+    <div class="deck">
+      <div class="deck-button-container">
+        ${buttons.map((b) => b.render()).join("")}
+      </div>
+    </div>
   `;
   root.innerHTML = rendered;
 }
