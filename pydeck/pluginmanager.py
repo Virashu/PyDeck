@@ -1,17 +1,17 @@
 """Plugin manager"""
 
-
+import importlib.util
+import logging
 import os
 import pathlib
-import typing as t
-import importlib.util
 import sys
+import typing as t
 
 from pydeck.plugin import DeckPlugin
 
-import logging
-
 logger = logging.getLogger(__name__)
+
+PLUGIN_SEP = "__"  # Separator for plugin's variables and methods
 
 
 def _load_module(module_name: str, plugins_path: str) -> type | None:
@@ -45,7 +45,7 @@ class PluginManager:
 
     Loads plugins"""
 
-    plugins: list[DeckPlugin]
+    plugins: list[DeckPlugin]  # TODO: Dictionary
     plugin_dir: str
 
     def __init__(self, plugin_dir: str) -> None:
@@ -70,6 +70,15 @@ class PluginManager:
             else:
                 logger.warning("Plugin '%s' not found", plugin)
 
+    def set_config(self, config: dict[str, t.Any]) -> None:
+        for plugin_name, settings in config.items():
+            _filtered = tuple(filter(lambda x: x.name == plugin_name, self.plugins))
+            if not _filtered:
+                continue
+            plugin = _filtered[0]
+
+            plugin.config.update(settings)
+
     def update(self) -> None:
         """Update plugins"""
 
@@ -83,8 +92,10 @@ class PluginManager:
         variables: dict[str, t.Any] = {}
 
         for plugin in self.plugins:
-            prefix = plugin.plugin_prefix
-            variables.update({f"{prefix}_{k}": v for k, v in plugin.variables.items()})
+            prefix = plugin.plugin_id
+            variables.update(
+                {f"{prefix}{PLUGIN_SEP}{k}": v for k, v in plugin.variables.items()}
+            )
 
         return variables
 
@@ -95,7 +106,9 @@ class PluginManager:
         actions: dict[str, t.Any] = {}
 
         for plugin in self.plugins:
-            prefix = plugin.plugin_prefix
-            actions.update({f"{prefix}_{k}": v for k, v in plugin.actions.items()})
+            prefix = plugin.plugin_id
+            actions.update(
+                {f"{prefix}{PLUGIN_SEP}{k}": v for k, v in plugin.actions.items()}
+            )
 
         return actions

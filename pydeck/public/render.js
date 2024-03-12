@@ -46,6 +46,7 @@ class Button {
 var baseRows = 3;
 var baseCols = 5;
 var baseButtons = [];
+
 for (let i = 0; i < baseRows; i++) {
   for (let j = 0; j < baseCols; j++) {
     baseButtons.push(new Button(`${i}:${j}`, `${i}:${j}`));
@@ -60,8 +61,6 @@ for (let i = 0; i < baseRows; i++) {
  * 4. Update icons, states, etc.
  * 
 */
-
-
 
 function deck_click(button_id) {
   console.log("click!");

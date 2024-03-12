@@ -20,20 +20,18 @@ class Main(DeckPlugin):
     description = "Media control plugin"
     author = "Virashu"
 
-    plugin_prefix = "media_control"
-
-    variables: dict[str, t.Any] = {
-        "title": "",
-        "artist": "",
-        "album": "",
-    }
-
-    config: dict[str, t.Any] = {
-        "url": "http://localhost:8888",
-    }
+    plugin_id = "media_control"
 
     @t.final
     def load(self):
+        self.variables = {
+            "title": "",
+            "artist": "",
+            "album": "",
+        }
+        self.config = {
+            "url": "http://localhost:8888",
+        }
         self.actions: dict[str, t.Any] = {"toggle_pause": self._toggle_pause}
 
     @t.final

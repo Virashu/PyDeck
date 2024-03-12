@@ -1,6 +1,5 @@
 """Deck button"""
 
-
 import typing as t
 
 
@@ -34,6 +33,7 @@ class Button:
         self.action = action
 
     def dict(self) -> dict[str, t.Any]:
+        """Returns properties of a button as dictionary"""
         return {
             "text": self.text,
         }
@@ -42,4 +42,7 @@ class Button:
         return str(self.dict())
 
     def format(self, **kwargs: t.Any) -> None:
+        """Format inner text with variables
+
+        Bruh. Use in copies"""
         self.text = self.text.format(**kwargs)

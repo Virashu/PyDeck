@@ -1,11 +1,10 @@
 """Abstract base plugin"""
 
-
-import typing as t
 import abc
+import typing as t
 
 
-class DeckPlugin:
+class DeckPlugin(abc.ABC):
     """Abstract base PyDeck plugin class
 
     All PyDeck plugins should inherit from this class
@@ -27,7 +26,7 @@ class DeckPlugin:
     description: str
     author: str
 
-    plugin_prefix: str
+    plugin_id: str
 
     actions: dict[str, t.Any]
     variables: dict[str, t.Any]
@@ -38,6 +37,7 @@ class DeckPlugin:
     def __init__(self) -> None:
         self.actions = {}
         self.variables = {}
+        self.config = {}
 
     @abc.abstractmethod
     def load(self) -> None:

@@ -2,25 +2,25 @@
 
 __all__ = ["Deck"]
 
-from itertools import product
-import typing as t
-import threading
-import time
 import copy
 import logging
+import threading
+import time
+import typing as t
+from itertools import product
 
 import flask
 
-from pydeck.pluginmanager import PluginManager
 from pydeck.button import Button as DeckButton
+from pydeck.pluginmanager import PluginManager
 from pydeck.utils import empty
-
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 logging.getLogger("flask").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# Disable banner (cannot be done other way :( )
 flask.cli.show_server_banner = empty
 
 PATH = __file__.replace("\\", "/").rsplit("/", 1)[0]
@@ -30,6 +30,9 @@ ButtonId: t.TypeAlias = tuple[int, int]
 
 
 def prep_buttons(obj: dict[ButtonId, DeckButton]) -> dict[str, list[dict[str, t.Any]]]:
+    """Prepare buttons for API response
+
+    (Adds id as value in dictionary)"""
     buttons: list[dict[str, t.Any]] = []
     for k, v in obj.items():
         buttons.append({"id": k} | v.dict())
@@ -51,11 +54,11 @@ class Deck:
 
     def __init__(self) -> None:
         self.buttons = {
-            (0, 0): DeckButton("Button 1\n{media_control_title}"),
-            (1, 1): DeckButton("Button 2\n{media_control_artist}"),
-            (2, 4): DeckButton("Button 3\n{media_control_artist}"),
-            (2, 2): DeckButton("time: {builtin_time}",),
-            (2, 3): DeckButton("pause", action="media_control_toggle_pause"),
+            (0, 0): DeckButton("Button 1\n{media_control__title}"),
+            (1, 1): DeckButton("Button 2\n{media_control__artist}"),
+            (2, 4): DeckButton("Button 3\n{media_control__artist}"),
+            (2, 2): DeckButton("time: {builtin__time}"),
+            (2, 3): DeckButton("pause", action="media_control__toggle_pause"),
         }
         self.config = {"dimensions": {"rows": 3, "cols": 5}}
         self.buttons_rendered = {}
@@ -79,6 +82,8 @@ class Deck:
     def run(self) -> None:
         """Start deck server"""
         self.plugin_manager.load()
+
+        self.plugin_manager.set_config(self.plugins_config)
 
         self.actions = self.plugin_manager.actions
 
@@ -125,6 +130,8 @@ class Deck:
 
     def _run_web_interface(self) -> None:
         app = flask.Flask(__name__)
+
+        # Flask used just for API
 
         @app.get("/")
         def _a1() -> flask.Response:

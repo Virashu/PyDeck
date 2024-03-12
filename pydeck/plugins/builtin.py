@@ -1,6 +1,7 @@
-from pydeck.plugin import DeckPlugin
-import typing as t
 import datetime
+import typing as t
+
+from pydeck.plugin import DeckPlugin
 
 
 class Main(DeckPlugin):
@@ -8,7 +9,7 @@ class Main(DeckPlugin):
     description = "Builtin plugin"
     author = "Virashu"
 
-    plugin_prefix = "builtin"
+    plugin_id = "builtin"
 
     @t.final
     def load(self):

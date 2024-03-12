@@ -1,6 +1,6 @@
 import logging
-from .pydeck import Deck
 
+from .pydeck import Deck
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
