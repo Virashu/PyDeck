@@ -33,7 +33,7 @@ class DeckPlugin(abc.ABC):
 
     config: dict[str, t.Any]
 
-    @abc.abstractmethod
+    # @abc.abstractmethod
     def __init__(self) -> None:
         self.actions = {}
         self.variables = {}

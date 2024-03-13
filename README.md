@@ -9,5 +9,7 @@ StreamDeck or Macro-Deck copy in python
 ## ToDo
 
 - [x] Buttons list --> dicts
-- [ ] GUI API
+- [ ] Plugins list --> dict
+- [ ] GUI API for server configuration
 - [ ] Connection settings
+- [ ] Actions args
