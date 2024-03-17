@@ -1,3 +1,5 @@
+"""CLI"""
+
 import logging
 
 from .pydeck import Deck

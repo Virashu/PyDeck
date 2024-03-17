@@ -35,14 +35,15 @@ class Button:
         self.action = action
         self.action_args = action_args or {}
 
-    def dict(self) -> dict[str, t.Any]:
+    def as_dict(self) -> dict[str, t.Any]:
         """Returns properties of a button as dictionary"""
+
         return {
             "text": self.text,
         }
 
     def __repr__(self):
-        return str(self.dict())
+        return str(self.as_dict())
 
     def format(self, **kwargs: t.Any) -> None:
         """Format inner text with variables

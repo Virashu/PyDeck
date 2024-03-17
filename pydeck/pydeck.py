@@ -36,7 +36,7 @@ def prep_buttons(obj: dict[ButtonId, DeckButton]) -> dict[str, list[dict[str, t.
     (Adds id as value in dictionary)"""
     buttons: list[dict[str, t.Any]] = []
     for k, v in obj.items():
-        buttons.append({"id": k} | v.dict())
+        buttons.append({"id": k} | v.as_dict())
 
     return {"buttons": buttons}
 

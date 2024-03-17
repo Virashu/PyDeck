@@ -45,12 +45,12 @@ class PluginManager:
 
     Loads plugins"""
 
-    plugins: list[DeckPlugin]  # TODO: Dictionary
+    plugins: dict[str, DeckPlugin]
     plugin_dir: str
 
     def __init__(self, plugin_dir: str) -> None:
         self.plugin_dir = plugin_dir
-        self.plugins = []
+        self.plugins = {}
 
     def load(self) -> None:
         """Load plugins & execute them"""
@@ -66,23 +66,26 @@ class PluginManager:
             if plugin_main:
                 obj = plugin_main()
                 obj.load()
-                self.plugins.append(obj)
+                self.plugins[obj.plugin_id] = obj
             else:
                 logger.warning("Plugin '%s' not found", plugin)
 
-    def set_config(self, config: dict[str, t.Any]) -> None:
-        for plugin_name, settings in config.items():
-            _filtered = tuple(filter(lambda x: x.name == plugin_name, self.plugins))
-            if not _filtered:
-                continue
-            plugin = _filtered[0]
+    def set_config(self, config: dict[str, dict[str, t.Any]]) -> None:
+        """Set plugins' config
 
-            plugin.config.update(settings)
+        config: dict { plugin_name: { setting: value } }
+        """
+
+        for plugin_name, settings in config.items():
+            plugin = self.plugins.get(plugin_name)
+
+            if plugin:
+                plugin.config.update(settings)
 
     def update(self) -> None:
         """Update plugins"""
 
-        for plugin in self.plugins:
+        for plugin in self.plugins.values():
             plugin.update()
 
     @property
@@ -91,7 +94,7 @@ class PluginManager:
 
         variables: dict[str, t.Any] = {}
 
-        for plugin in self.plugins:
+        for plugin in self.plugins.values():
             prefix = plugin.plugin_id
             variables.update(
                 {f"{prefix}{PLUGIN_SEP}{k}": v for k, v in plugin.variables.items()}
@@ -105,7 +108,7 @@ class PluginManager:
 
         actions: dict[str, t.Any] = {}
 
-        for plugin in self.plugins:
+        for plugin in self.plugins.values():
             prefix = plugin.plugin_id
             actions.update(
                 {f"{prefix}{PLUGIN_SEP}{k}": v for k, v in plugin.actions.items()}
