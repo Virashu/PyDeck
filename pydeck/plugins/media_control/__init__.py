@@ -1,12 +1,28 @@
 import json
 import urllib.request
+import urllib.error
 import typing as t
 from pydeck.plugin import DeckPlugin
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _check_connection(url: str):
+    try:
+        with urllib.request.urlopen(url, timeout=0.1):
+            pass
+    except urllib.error.URLError:
+        return False
+    return True
 
 
 def _get_data(url: str):
-    with urllib.request.urlopen(url, timeout=0.1) as response:
-        contents = response.read()
+    try:
+        with urllib.request.urlopen(url, timeout=0.1) as response:
+            contents = response.read()
+    except urllib.error.URLError:
+        return None
 
     try:
         data = json.loads(contents)
@@ -33,6 +49,9 @@ class Main(DeckPlugin):
             "url": "http://localhost:8888",
         }
         self.actions: dict[str, t.Any] = {"toggle_pause": self._toggle_pause}
+
+        if not _check_connection(self.config["url"]):
+            logger.warning("Media control server not running")
 
     @t.final
     def update(self) -> None:

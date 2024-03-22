@@ -86,7 +86,10 @@ class PluginManager:
         """Update plugins"""
 
         for plugin in self.plugins.values():
-            plugin.update()
+            try:
+                plugin.update()
+            except Exception as e:
+                logger.error("Plugin '%s' error: %s", plugin.name, e)
 
     @property
     def variables(self) -> dict[str, t.Any]:

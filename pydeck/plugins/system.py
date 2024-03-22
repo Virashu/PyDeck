@@ -39,4 +39,6 @@ class Main(DeckPlugin):
             res = subprocess.check_output(path.split()).decode("utf-8")
             self.variables[var_name] = res
 
-        subprocess.Popen(path.split())
+        else:
+            p = subprocess.Popen(path.split())
+            del p

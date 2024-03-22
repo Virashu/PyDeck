@@ -54,10 +54,29 @@ class Deck:
     _buttons_rendered: dict[ButtonId, DeckButton]
 
     def __init__(self) -> None:
-
         self._plugin_manager = PluginManager(plugin_dir=f"{PATH}/plugins")
         self._variables = {}
+        self._click_events: list[dict[str, t.Any]] = []
         self._running = True
+
+        # User configurable
+        self.buttons = {
+            (0, 0): DeckButton("Button 1\n{media_control__title}"),
+            (1, 1): DeckButton("Button 2\n{media_control__artist}"),
+            (2, 4): DeckButton("Button 3\n{media_control__artist}"),
+            (2, 2): DeckButton("time: {builtin__time}"),
+            (2, 3): DeckButton("pause", action="media_control__toggle_pause"),
+            (1, 3): DeckButton(
+                "WT", action="system__launch", action_args={"path": "wt.exe"}
+            ),
+        }
+        self.config = {
+            "connection": {"host": "127.0.0.1", "port": 8192},
+            "dimensions": {"rows": 3, "cols": 5},
+        }
+        self.plugins_config = {
+            "media_control": {"url": "http://localhost:8888/data"},
+        }
 
         # Blank dummy buttons
         self._buttons_base = {
@@ -69,27 +88,6 @@ class Deck:
         }
         # Rendered initialized buttons
         self._buttons_rendered = {}
-
-        # User configurable
-        self.buttons = {
-            (0, 0): DeckButton("Button 1\n{media_control__title}"),
-            (1, 1): DeckButton("Button 2\n{media_control__artist}"),
-            (2, 4): DeckButton("Button 3\n{media_control__artist}"),
-            (2, 2): DeckButton("time: {builtin__time}"),
-            (2, 3): DeckButton("pause", action="media_control__toggle_pause"),
-            (1, 3): DeckButton(
-                "Start browser",
-                action="system__launch",
-                action_args={"path": "firefox"},
-            ),
-        }
-        self.config = {
-            "connection": {"host": "127.0.0.1", "port": 8192},
-            "dimensions": {"rows": 3, "cols": 5},
-        }
-        self.plugins_config = {
-            "media_control": {"url": "http://localhost:8888/data"},
-        }
 
     def run(self) -> None:
         """Start deck server"""
@@ -118,6 +116,9 @@ class Deck:
 
         self._plugin_manager.update()
 
+        while self._click_events:
+            self._handle_click(self._click_events.pop(0))
+
         self._variables.update(self._plugin_manager.variables)
 
         self._buttons_rendered = copy.deepcopy(self.buttons)
@@ -137,10 +138,12 @@ class Deck:
         tuple_id: ButtonId = tuple(map(int, str_id.split(":")[:2]))  # type: ignore
         button = self.buttons.get(tuple_id)  # type: ignore
 
-        if button:
-            if button.action:
-                logger.info("Action: %s", button.action)
+        if button and button.action:
+            logger.info("Action: %s", button.action)
+            try:
                 self._actions[button.action](**button.action_args)
+            except Exception as e:
+                logger.error("Action error: %s", e)
 
     def _run_update_loop(self) -> None:
         while self._running:
@@ -178,7 +181,7 @@ class Deck:
         def _c() -> flask.Response:  # type: ignore
             json = flask.request.get_json()
             if json.get("type") == "click":
-                self._handle_click(json.get("data"))
+                self._click_events.append(json.get("data"))
             response = flask.Response("bruh")
             response.headers.add("Access-Control-Allow-Origin", "*")
             response.headers.add("Access-Control-Allow-Methods", "GET, POST")
