@@ -8,14 +8,14 @@ class Button:
 
     text: str
 
-    text_align: t.Optional[str] = None
-    font_family: t.Optional[str] = None
-    font_size: t.Optional[str] = None
+    text_align: str
+    font_family: str
+    font_size: str
 
-    icon: t.Optional[str] = None
+    icon: t.Optional[str]
 
-    action: t.Optional[str] = None
-    action_args: t.Optional[dict[str, t.Any]] = None
+    action: t.Optional[str]
+    action_args: dict[str, t.Any]
 
     def __init__(
         self,

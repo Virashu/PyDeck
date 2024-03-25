@@ -14,6 +14,9 @@ class DeckPlugin(abc.ABC):
         description: Description of the plugin
         author: Author of the plugin
 
+        plugin_id: Unique identifier for variable & action access
+            (fallback to file/package name if not set)
+
         plugin_prefix: String plugin prefix used for variables and actions
 
         actions: Dictionary of actions (Callables)

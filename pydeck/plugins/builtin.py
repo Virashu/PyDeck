@@ -9,8 +9,6 @@ class Main(DeckPlugin):
     description = "Builtin plugin"
     author = "Virashu"
 
-    plugin_id = "builtin"
-
     @t.final
     def load(self):
         self.variables = {"time": self._get_time()}

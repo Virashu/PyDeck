@@ -28,6 +28,7 @@ PATH = __file__.replace("\\", "/").rsplit("/", 1)[0]
 
 
 ButtonId: t.TypeAlias = tuple[int, int]
+ActionCallable: t.TypeAlias = t.Callable[..., t.Any]
 
 
 def prep_buttons(obj: dict[ButtonId, DeckButton]) -> dict[str, list[dict[str, t.Any]]]:
@@ -46,7 +47,7 @@ class Deck:
 
     config: dict[str, t.Any]
     plugins_config: dict[str, t.Any]
-    _actions: dict[str, t.Any]
+    _actions: dict[str, ActionCallable]
     _variables: dict[str, t.Any]
 
     buttons: dict[ButtonId, DeckButton]
