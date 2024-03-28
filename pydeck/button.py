@@ -1,6 +1,7 @@
 """Deck button"""
 
 import typing as t
+from pydeck.config import DEFAULTS
 
 
 class Button:
@@ -28,9 +29,9 @@ class Button:
     ):
         self.text = text
 
-        self.text_align = text_align or "center"
-        self.font_family = font_family or "sans-serif"
-        self.font_size = font_size or "14"
+        self.text_align = text_align or DEFAULTS["button"]["align"]
+        self.font_family = font_family or DEFAULTS["button"]["font"]
+        self.font_size = font_size or DEFAULTS["button"]["size"]
 
         self.action = action
         self.action_args = action_args or {}

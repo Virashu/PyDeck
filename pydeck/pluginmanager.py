@@ -66,7 +66,10 @@ class PluginManager:
             if plugin_main:
                 obj = plugin_main()
                 obj.load()
-                self.plugins[obj.plugin_id] = obj
+                if hasattr(obj, "plugin_id"):
+                    self.plugins[obj.plugin_id] = obj
+                else:
+                    self.plugins[plugin.replace(".py", "")] = obj
             else:
                 logger.warning("Plugin '%s' not found", plugin)
 
@@ -97,10 +100,9 @@ class PluginManager:
 
         variables: dict[str, t.Any] = {}
 
-        for plugin in self.plugins.values():
-            prefix = plugin.plugin_id
+        for plugin_id, plugin in self.plugins.items():
             variables.update(
-                {f"{prefix}{PLUGIN_SEP}{k}": v for k, v in plugin.variables.items()}
+                {f"{plugin_id}{PLUGIN_SEP}{k}": v for k, v in plugin.variables.items()}
             )
 
         return variables
@@ -111,10 +113,9 @@ class PluginManager:
 
         actions: dict[str, t.Any] = {}
 
-        for plugin in self.plugins.values():
-            prefix = plugin.plugin_id
+        for plugin_id, plugin in self.plugins.items():
             actions.update(
-                {f"{prefix}{PLUGIN_SEP}{k}": v for k, v in plugin.actions.items()}
+                {f"{plugin_id}{PLUGIN_SEP}{k}": v for k, v in plugin.actions.items()}
             )
 
         return actions

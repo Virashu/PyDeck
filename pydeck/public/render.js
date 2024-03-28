@@ -1,9 +1,20 @@
 "use strict";
+/* Order
+ *
+ * 1. Get buttons, images, state, config
+ * 2. Render buttons
+ * 3. Handle clicks
+ * 4. Update icons, states, etc.
+ * 
+*/
+
+const clientConfig = config;
+const host = `http://${clientConfig.address}:${clientConfig.port}`;
 
 const root = document.getElementById("root");
-var deck_config;
-var buttons = [];
 var updatePending = false;
+
+var deckConfig;
 
 class Button {
   constructor(id, text) {
@@ -42,29 +53,57 @@ class Button {
   }
 }
 
+class PageDeck {
+  constructor() {
+    this.buttons = [];
+  }
 
-var baseRows = 3;
-var baseCols = 5;
-var baseButtons = [];
+  async init() {
+    this.buttons = await fetchButtons();
+  }
 
-for (let i = 0; i < baseRows; i++) {
-  for (let j = 0; j < baseCols; j++) {
-    baseButtons.push(new Button(`${i}:${j}`, `${i}:${j}`));
+  async update() {
+    // Check if config changed
+    // Check if buttons changed
+    // Fetch everything
+
+    this.buttons = await fetchButtons();
+  }
+
+  render() {
+    let rendered = `
+    <div class="nav-fixed">
+      <button onclick="changePage('settings')">Settings</button>
+    </div>
+    <div class="deck">
+      <div class="deck-button-container" style="--deck-rows: ${deckConfig.deck.rows}; --deck-columns: ${deckConfig.deck.cols};">
+        ${this.buttons.map((b) => b.render()).join("")}
+      </div>
+    </div>
+  `;
+    return rendered;
   }
 }
 
-/* Order
- *
- * 1. Get buttons, images, state, config
- * 2. Render buttons
- * 3. Handle clicks
- * 4. Update icons, states, etc.
- * 
-*/
+class PageSettings {
+  constructor() { }
+  async init() { }
+  async update() { }
+  render() {
+    return `
+    <div class="nav-fixed">
+      <button onclick="changePage('deck')">Deck</button>
+    </div>
+    <div class="settings">
+      <h1>Settings</h1>
+
+    </div>
+    `;
+  }
+}
 
 function deck_click(button_id) {
-  console.log("click!");
-  fetch(`http://${config.address}:${config.port}/api/event`, {
+  fetch(`${host}/api/event`, {
     method: "POST",
     headers: {
       'Accept': '*',
@@ -80,57 +119,70 @@ function deck_click(button_id) {
   });
 }
 
-function renderScreen() {
-  let rendered = `
-    <div class="deck">
-      <div class="deck-button-container">
-        ${buttons.map((b) => b.render()).join("")}
-      </div>
-    </div>
-  `;
-  root.innerHTML = rendered;
+function render(page) {
+  root.innerHTML = page.render();
 }
 
-const fetchButtons = () => {
-  fetch(`http://${config.address}:${config.port}/api/buttons`)
-    .then((res) => res.json())
-    .then((res) => {
-      buttons = res.buttons.map((button) =>
-        new Button(button.id, button.text)
-      );
-      updatePending = true;
-    })
+async function fetchButtons() {
+  let response = await fetch(`${host}/api/buttons`);
+  if (!response.ok) {
+    console.error("Failed to fetch buttons");
+    return [];
+  }
+
+  let data = await response.json();
+  let buttons = data.buttons.map((button) =>
+    new Button(button.id, button.text)
+  );
+  updatePending = true;
+  return buttons;
 }
 
-const init = async () => {
-  fetchButtons();
-  fetch(`http://${config.address}:${config.port}/api/config`, {
-    'Access-Control-Allow-Origin': '*',
-  })
-    .then((res) => res.json())
-    .then((res) => {
-      let css_vars = document.documentElement.style;
-      css_vars.setProperty("--deck-rows", res.dimensions.rows);
-      css_vars.setProperty("--deck-columns", res.dimensions.cols);
-      updatePending = true;
-    })
+async function fetchConfig() {
+  let response = await fetch(`${host}/api/config`);
+  let data = await response.json();
+  return data;
 }
 
-const initTest = () => {
-  buttons = baseButtons;
-  let css_vars = document.documentElement.style;
-  css_vars.setProperty("--deck-rows", baseRows);
-  css_vars.setProperty("--deck-columns", baseCols);
+async function init() {
+  deckConfig = await fetchConfig();
+
   updatePending = true;
 }
 
 init();
-renderScreen();
 
-setInterval(() => {
-  fetchButtons();
+const pages = {
+  "deck": new PageDeck(),
+  "settings": new PageSettings(),
+}
+
+var currentPage = "deck";
+
+function changePage(newPage) {
+  if (newPage === currentPage) return;
+  if (!pages[newPage]) return;
+  currentPage = newPage;
+  pages[currentPage].init();
+
+  requestUpdate();
+}
+
+function requestUpdate() {
+  updatePending = true;
+}
+
+function update() {
+  let page = pages[currentPage];
+  if (!page) return;
+  page.update();
+
   if (updatePending) {
     updatePending = false;
-    renderScreen();
+    render(page);
   }
-}, 100);
+}
+
+update();
+setInterval(update, 100);
+

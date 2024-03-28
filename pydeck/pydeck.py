@@ -15,6 +15,7 @@ import flask
 from pydeck.button import Button as DeckButton
 from pydeck.pluginmanager import PluginManager
 from pydeck.utils import empty
+from pydeck.config import CONFIG
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 logging.getLogger("flask").setLevel(logging.ERROR)
@@ -71,20 +72,14 @@ class Deck:
                 "WT", action="system__launch", action_args={"path": "wt.exe"}
             ),
         }
-        self.config = {
-            "connection": {"host": "127.0.0.1", "port": 8192},
-            "dimensions": {"rows": 3, "cols": 5},
-        }
-        self.plugins_config = {
-            "media_control": {"url": "http://localhost:8888/data"},
-        }
+        self.config = CONFIG
 
         # Blank dummy buttons
         self._buttons_base = {
             (x, y): DeckButton(f"{x}:{y}")
             for x, y in product(
-                range(self.config["dimensions"]["rows"]),
-                range(self.config["dimensions"]["cols"]),
+                range(self.config["deck"]["rows"]),
+                range(self.config["deck"]["cols"]),
             )
         }
         # Rendered initialized buttons
@@ -95,7 +90,7 @@ class Deck:
 
         self._plugin_manager.load()
 
-        self._plugin_manager.set_config(self.plugins_config)
+        self._plugin_manager.set_config(self.config["plugins"])
 
         self._actions = self._plugin_manager.actions
 
@@ -144,6 +139,8 @@ class Deck:
             try:
                 self._actions[button.action](**button.action_args)
             except Exception as e:
+                # We need to catch plugin-generated exceptions and
+                # log them to the user
                 logger.error("Action error: %s", e)
 
     def _run_update_loop(self) -> None:
@@ -163,7 +160,7 @@ class Deck:
         def _a(path: str) -> flask.Response:  # type: ignore
             return flask.send_from_directory(f"{PATH}/public", path)
 
-        # API
+        # API (Client)
 
         @app.get("/api/<path:path>")
         def _b(path: str) -> flask.Response:  # type: ignore
@@ -189,8 +186,20 @@ class Deck:
             response.headers.add("Access-Control-Allow-Headers", "*")
             return response
 
-        host = self.config["connection"]["host"]
-        port = self.config["connection"]["port"]
+        # API (Server config)
+        @app.get("/api/actions_list")
+        def _d() -> flask.Response:  # type: ignore
+            return flask.jsonify(list(self._actions.keys()))
 
-        logger.info("Running on %s:%s", host, port)
+        @app.get("/api/action_details/<path:path>")
+        def _e(path: str) -> flask.Response:  # type: ignore
+            if path in self._actions:
+                return flask.jsonify(self._actions[path])
+
+            return flask.Response()
+
+        host = self.config["server"]["host"]
+        port = self.config["server"]["port"]
+
+        logger.info("Running on http://%s:%s", host, port)
         app.run(host, port)

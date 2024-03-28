@@ -114,3 +114,18 @@
 .deck-button > * {
   position: absolute;
 }
+
+.nav-fixed {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+
+  padding: .5em;
+}
