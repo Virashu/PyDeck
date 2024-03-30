@@ -129,19 +129,31 @@ class Deck:
             logger.warning("Invalid button_id: %s", str_id)
             return
 
-        logger.info("Button clicked: %s", str_id)
-
         tuple_id: ButtonId = tuple(map(int, str_id.split(":")[:2]))  # type: ignore
         button = self.buttons.get(tuple_id)  # type: ignore
 
-        if button and button.action:
-            logger.info("Action: %s", button.action)
-            try:
-                self._actions[button.action](**button.action_args)
-            except Exception as e:
-                # We need to catch plugin-generated exceptions and
-                # log them to the user
-                logger.error("Action error: %s", e)
+        if not button:
+            logger.warning("Invalid button_id: %s", str_id)
+            return
+
+        logger.info("Button clicked: %s", str_id)
+
+        if not button.action:
+            return
+
+        logger.info("Action: %s", button.action)
+        action_callable = self._actions.get(button.action)
+
+        if not action_callable:
+            logger.warning("Invalid action: %s", button.action)
+            return
+
+        try:
+            action_callable(**button.action_args)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            # We need to catch plugin-generated exceptions and
+            # log them to the user
+            logger.error("Action error: %s", e)
 
     def _run_update_loop(self) -> None:
         while self._running:
