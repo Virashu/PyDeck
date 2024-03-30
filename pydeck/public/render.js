@@ -9,11 +9,16 @@
 */
 
 const clientConfig = config;
-const host = `http://${clientConfig.address}:${clientConfig.port}`;
+const HOST = `http://${clientConfig.address}:${clientConfig.port}`;
 
-const root = document.getElementById("root");
+const nav = `
+  <div class="nav-fixed">
+    <button onclick="changePage('deck')">Deck</button>
+    <button onclick="changePage('settings')">Settings</button>
+  </div>
+`;
+
 var updatePending = false;
-
 var deckConfig;
 
 class Button {
@@ -72,38 +77,54 @@ class PageDeck {
 
   render() {
     let rendered = `
-    <div class="nav-fixed">
-      <button onclick="changePage('settings')">Settings</button>
-    </div>
-    <div class="deck">
-      <div class="deck-button-container" style="--deck-rows: ${deckConfig.deck.rows}; --deck-columns: ${deckConfig.deck.cols};">
-        ${this.buttons.map((b) => b.render()).join("")}
+      <div class="deck">
+        <div class="deck-button-container" style="--deck-rows: ${deckConfig.deck.rows}; --deck-columns: ${deckConfig.deck.cols};">
+          ${this.buttons.map((b) => b.render()).join("")}
+        </div>
       </div>
-    </div>
-  `;
+    `;
     return rendered;
   }
 }
 
+async function fetchActionsNames() {
+  let response = await fetch(`${HOST}/api/actions_list`);
+  if (!response.ok) {
+    console.error("Failed to fetch actions");
+    return [];
+  }
+
+  let data = await response.json();
+  return data;
+}
+
 class PageSettings {
-  constructor() { }
-  async init() { }
-  async update() { }
+  constructor() {
+    this.actions_list = [];
+  }
+
+  async init() {
+    this.actions_list = await fetchActionsNames();
+  }
+
+  async update() {
+    this.actions_list = await fetchActionsNames();
+  }
+
   render() {
     return `
-    <div class="nav-fixed">
-      <button onclick="changePage('deck')">Deck</button>
-    </div>
-    <div class="settings">
-      <h1>Settings</h1>
-
-    </div>
+      <div class="settings">
+        <h1>Settings</h1>
+        <ul>
+          ${this.actions_list.map((action) => `<li>${action}</li>`).join("")}
+        </ul>
+      </div>
     `;
   }
 }
 
 function deck_click(button_id) {
-  fetch(`${host}/api/event`, {
+  fetch(`${HOST}/api/event`, {
     method: "POST",
     headers: {
       'Accept': '*',
@@ -119,12 +140,14 @@ function deck_click(button_id) {
   });
 }
 
+var root = document.getElementById("root");
+
 function render(page) {
   root.innerHTML = page.render();
 }
 
 async function fetchButtons() {
-  let response = await fetch(`${host}/api/buttons`);
+  let response = await fetch(`${HOST}/api/buttons`);
   if (!response.ok) {
     console.error("Failed to fetch buttons");
     return [];
@@ -139,13 +162,20 @@ async function fetchButtons() {
 }
 
 async function fetchConfig() {
-  let response = await fetch(`${host}/api/config`);
+  let response = await fetch(`${HOST}/api/config`);
   let data = await response.json();
   return data;
 }
 
 async function init() {
   deckConfig = await fetchConfig();
+
+  root.innerHTML = nav;
+  let newRoot = document.createElement("div");
+  newRoot.classList.add("container");
+  root.appendChild(newRoot);
+
+  root = newRoot;
 
   updatePending = true;
 }
@@ -160,6 +190,7 @@ const pages = {
 var currentPage = "deck";
 
 function changePage(newPage) {
+  console.log(newPage);
   if (newPage === currentPage) return;
   if (!pages[newPage]) return;
   currentPage = newPage;
