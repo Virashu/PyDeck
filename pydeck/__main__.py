@@ -4,6 +4,9 @@ import logging
 
 from .pydeck import Deck
 
+logging.getLogger("werkzeug").setLevel(logging.ERROR)
+logging.getLogger("flask").setLevel(logging.ERROR)
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()

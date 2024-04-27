@@ -1,9 +1,10 @@
 import json
-import urllib.request
-import urllib.error
-import typing as t
-from pydeck.plugin import DeckPlugin
 import logging
+import typing as t
+import urllib.error
+import urllib.request
+
+from pydeck.plugin import DeckPlugin
 
 logger = logging.getLogger(__name__)
 

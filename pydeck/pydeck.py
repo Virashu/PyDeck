@@ -4,21 +4,20 @@ __all__ = ["Deck"]
 
 import copy
 import logging
+import re
 import threading
 import time
 import typing as t
-import re
 from itertools import product
 
 import flask
 
 from pydeck.button import Button as DeckButton
-from pydeck.pluginmanager import PluginManager
-from pydeck.utils import empty
 from pydeck.config import CONFIG
+from pydeck.pluginmanager import PluginManager
+from pydeck.typing import ActionCallable, ButtonId
+from pydeck.utils import empty
 
-logging.getLogger("werkzeug").setLevel(logging.ERROR)
-logging.getLogger("flask").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -26,10 +25,6 @@ logger.setLevel(logging.INFO)
 flask.cli.show_server_banner = empty
 
 PATH = __file__.replace("\\", "/").rsplit("/", 1)[0]
-
-
-ButtonId: t.TypeAlias = tuple[int, int]
-ActionCallable: t.TypeAlias = t.Callable[..., t.Any]
 
 
 def prep_buttons(obj: dict[ButtonId, DeckButton]) -> dict[str, list[dict[str, t.Any]]]:
