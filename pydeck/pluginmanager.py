@@ -8,7 +8,7 @@ import sys
 import typing as t
 import zipimport
 
-from pydeck.plugin import DeckPlugin
+from pydeck_shared import DeckPlugin
 
 logger = logging.getLogger(__name__)
 

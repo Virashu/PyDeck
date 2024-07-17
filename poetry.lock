@@ -289,7 +289,7 @@ develop = false
 type = "git"
 url = "https://github.com/virashu/pydeck_shared"
 reference = "HEAD"
-resolved_reference = "caacdd1d0ed682a0e2ffdfe4f8b43d0c58b30055"
+resolved_reference = "c08914626a2dec51b58a179ac82058c90fa66b23"
 
 [[package]]
 name = "requests"
