@@ -6,6 +6,7 @@ import os
 import pathlib
 import sys
 import typing as t
+import zipimport
 
 from pydeck.plugin import DeckPlugin
 
@@ -18,18 +19,31 @@ def _load_module(module_name: str, plugins_path: str) -> type | None:
     if pathlib.Path(f"{plugins_path}/{module_name}").is_dir():
         module_path = f"{plugins_path}/{module_name}/__init__.py"
 
-    elif pathlib.Path(f"{plugins_path}/{module_name}").is_file():
+    elif (
+        pathlib.Path(f"{plugins_path}/{module_name}").is_file()
+        and module_name.endswith(".py")
+        or module_name.endswith(".zip")
+    ):
         module_path = f"{plugins_path}/{module_name}"
 
     else:
+        logger.warning("File '%s' is not a plugin", module_name)
         return None
+
+    # if module_path.endswith(".zip"):
+    #     _zip = zipimport.zipimporter(module_path)
+    #     _module = _zip.load_module(module_name)
+    #     zipimport.zipimporter.find_spec()
+    #     return _module
 
     _spec = importlib.util.spec_from_file_location(module_name, module_path)
     if not _spec:
+        logger.warning("Failed to load plugin '%s'", module_name)
         return None
     _module = importlib.util.module_from_spec(_spec)
     sys.modules[module_name] = _module
     if not _spec.loader:
+        logger.warning("Failed to load plugin '%s'", module_name)
         return None
     _spec.loader.exec_module(_module)
 
@@ -60,18 +74,20 @@ class PluginManager:
         for plugin in packages:
             if plugin.startswith("_"):
                 continue
+
             # plugin_module = __import__(f"pydeck.plugins.{plugin}")
-            plugin_main: type | None = _load_module(plugin, self.plugin_dir)
-            # self.plugins.append(plugin_module.Main())
-            if plugin_main:
-                obj = plugin_main()
-                obj.load()
-                if hasattr(obj, "plugin_id"):
-                    self.plugins[obj.plugin_id] = obj
-                else:
-                    self.plugins[plugin.replace(".py", "")] = obj
+            plugin_main: type[DeckPlugin] | None = _load_module(plugin, self.plugin_dir)
+
+            if plugin_main is None:
+                continue
+
+            obj: DeckPlugin = plugin_main()
+            obj.load()
+
+            if hasattr(obj, "plugin_id"):
+                self.plugins[obj.plugin_id] = obj
             else:
-                logger.warning("Plugin '%s' not found", plugin)
+                self.plugins[plugin.replace(".py", "")] = obj
 
     def set_config(self, config: dict[str, dict[str, t.Any]]) -> None:
         """Set plugins' config

@@ -8,8 +8,9 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 flask = "^3.0.0"
-saaba = {git = "https://github.com/virashu/saaba"}
+saaba = { git = "https://github.com/virashu/saaba" }
 requests = "^2.31.0"
+pydeck-shared = {git = "https://github.com/virashu/pydeck_shared"}
 
 
 [build-system]
