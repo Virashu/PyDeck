@@ -13,7 +13,7 @@ from itertools import product
 import flask
 
 from pydeck.button import Button as DeckButton
-from pydeck.config import CONFIG
+from pydeck.config import config
 from pydeck.pluginmanager import PluginManager
 from pydeck.typing import ActionCallable, ButtonId
 from pydeck.utils import empty
@@ -67,7 +67,7 @@ class Deck:
                 "WT", action="system__launch", action_args={"path": "wt.exe"}
             ),
         }
-        self.config = CONFIG
+        self.config = config
 
         # Blank dummy buttons
         self._buttons_base = {

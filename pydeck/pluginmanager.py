@@ -6,7 +6,7 @@ import os
 import pathlib
 import sys
 import typing as t
-import zipimport
+# import zipimport
 
 from pydeck_shared import DeckPlugin
 

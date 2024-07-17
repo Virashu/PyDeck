@@ -1,7 +1,7 @@
 import datetime
 import typing as t
 
-from pydeck.plugin import DeckPlugin
+from pydeck_shared.plugin import DeckPlugin
 
 
 class Main(DeckPlugin):

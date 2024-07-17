@@ -9,7 +9,7 @@ import typing as t
 import subprocess
 import warnings
 
-from pydeck.plugin import DeckPlugin
+from pydeck_shared.plugin import DeckPlugin
 
 
 class Main(DeckPlugin):

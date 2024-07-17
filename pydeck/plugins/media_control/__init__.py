@@ -4,7 +4,7 @@ import typing as t
 import urllib.error
 import urllib.request
 
-from pydeck.plugin import DeckPlugin
+from pydeck_shared.plugin import DeckPlugin
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@
 
 import typing as t
 
-from pydeck.config import DEFAULTS
+from pydeck.config import defaults
 
 
 class Button:
@@ -30,9 +30,9 @@ class Button:
     ):
         self.text = text
 
-        self.text_align = text_align or DEFAULTS["button"]["align"]
-        self.font_family = font_family or DEFAULTS["button"]["font"]
-        self.font_size = font_size or DEFAULTS["button"]["size"]
+        self.text_align = text_align or defaults["button"]["align"]
+        self.font_family = font_family or defaults["button"]["font"]
+        self.font_size = font_size or defaults["button"]["size"]
 
         self.action = action
         self.action_args = action_args or {}
