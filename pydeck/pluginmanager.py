@@ -6,49 +6,55 @@ import os
 import pathlib
 import sys
 import typing as t
-# import zipimport
 
 from pydeck_shared import DeckPlugin
+
+from .utils import get_path
+
+libs_path = get_path(__file__) + "/plugin_libs"
+sys.path.append(libs_path)
+
 
 logger = logging.getLogger(__name__)
 
 PLUGIN_SEP = "__"  # Separator for plugin's variables and methods
 
 
-def _load_module(module_name: str, plugins_path: str) -> type | None:
-    if pathlib.Path(f"{plugins_path}/{module_name}").is_dir():
-        module_path = f"{plugins_path}/{module_name}/__init__.py"
+def _load_module(plugin_name: str, plugins_path: str) -> type[DeckPlugin] | None:
 
-    elif (
-        pathlib.Path(f"{plugins_path}/{module_name}").is_file()
-        and module_name.endswith(".py")
-        or module_name.endswith(".zip")
-    ):
-        module_path = f"{plugins_path}/{module_name}"
+    if pathlib.Path(f"{plugins_path}/{plugin_name}").is_dir():
+        module_path = f"{plugins_path}/{plugin_name}/__init__.py"
+        module_name = plugin_name
+
+    elif pathlib.Path(f"{plugins_path}/{plugin_name}").is_file():
+        module_path = f"{plugins_path}/{plugin_name}"
+        module_name, ext = plugin_name.rsplit(".", 1)
+
+        if ext in ("zip", "pyz"):
+            sys.path.append(module_path)
+
+            _module = __import__(f"{plugin_name}")
+            print(_module)
+
+            return _module.Main
 
     else:
-        logger.warning("File '%s' is not a plugin", module_name)
+        logger.warning("File '%s' is not a plugin", plugin_name)
         return None
 
-    # if module_path.endswith(".zip"):
-    #     _zip = zipimport.zipimporter(module_path)
-    #     _module = _zip.load_module(module_name)
-    #     zipimport.zipimporter.find_spec()
-    #     return _module
-
-    _spec = importlib.util.spec_from_file_location(module_name, module_path)
+    _spec = importlib.util.spec_from_file_location(plugin_name, module_path)
     if not _spec:
-        logger.warning("Failed to load plugin '%s'", module_name)
+        logger.warning("Failed to load plugin '%s'", plugin_name)
         return None
     _module = importlib.util.module_from_spec(_spec)
     sys.modules[module_name] = _module
     if not _spec.loader:
-        logger.warning("Failed to load plugin '%s'", module_name)
+        logger.warning("Failed to load plugin '%s'", plugin_name)
         return None
     _spec.loader.exec_module(_module)
 
     if not hasattr(_module, "Main"):
-        logger.warning("Plugin '%s' has wrong structure", module_name)
+        logger.warning("Plugin '%s' has wrong structure", plugin_name)
         return None
 
     return _module.Main
@@ -75,6 +81,7 @@ class PluginManager:
             if plugin.startswith("_"):
                 continue
 
+            logger.debug("Loading plugin: %s", plugin)
             # plugin_module = __import__(f"pydeck.plugins.{plugin}")
             plugin_main: type[DeckPlugin] | None = _load_module(plugin, self.plugin_dir)
 
@@ -88,6 +95,10 @@ class PluginManager:
                 self.plugins[obj.plugin_id] = obj
             else:
                 self.plugins[plugin.replace(".py", "")] = obj
+
+            logger.debug("Loaded plugin: %s", plugin)
+
+        logger.debug("Loaded plugins: %s", self.plugins)
 
     def set_config(self, config: dict[str, dict[str, t.Any]]) -> None:
         """Set plugins' config

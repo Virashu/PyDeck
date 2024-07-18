@@ -8,7 +8,7 @@ logging.getLogger("werkzeug").setLevel(logging.ERROR)
 logging.getLogger("flask").setLevel(logging.ERROR)
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
 formatter = logging.Formatter("{levelname:<10} {name:<32} {message}", style="{")
 handler.setFormatter(formatter)
