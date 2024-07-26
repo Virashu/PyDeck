@@ -98,7 +98,7 @@ class PluginManager:
 
             logger.debug("Loaded plugin: %s", plugin)
 
-        logger.debug("Loaded plugins: %s", self.plugins)
+        logger.debug("Loaded plugins: %s", list(self.plugins.keys()))
 
     def set_config(self, config: dict[str, dict[str, t.Any]]) -> None:
         """Set plugins' config

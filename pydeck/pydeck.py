@@ -58,20 +58,17 @@ class Deck:
 
         # User configurable
         self.buttons = {
-            (0, 0): DeckButton("Button 1\n{media_control__title}"),
-            (1, 1): DeckButton("Button 2\n{media_control__artist}"),
-            (2, 4): DeckButton("Button 3\n{media_control__artist}"),
+            (0, 2): DeckButton("{media_control__title}\n{media_control__artist}"),
+            (1, 1): DeckButton("Previous", action="media_control__prev"),
+            (1, 2): DeckButton("Play/Pause", action="media_control__toggle_pause"),
+            (1, 3): DeckButton("Next", action="media_control__next"),
             (2, 2): DeckButton("time: {builtin__time}"),
-            (2, 3): DeckButton("pause", action="media_control__toggle_pause"),
-            (1, 3): DeckButton(
-                "WT", action="system__launch", action_args={"path": "wt.exe"}
-            ),
         }
         self.config = config
 
         # Blank dummy buttons
         self._buttons_base = {
-            (x, y): DeckButton(f"{x}:{y}")
+            (x, y): DeckButton(f"{x}:{y}" if False else "")
             for x, y in product(
                 range(self.config["deck"]["rows"]),
                 range(self.config["deck"]["cols"]),

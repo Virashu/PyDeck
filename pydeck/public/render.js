@@ -215,5 +215,5 @@ function update() {
 }
 
 update();
-setInterval(update, 100);
+setInterval(update, 500);
 

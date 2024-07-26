@@ -1,10 +1,10 @@
 {
-  "deck": { "rows": 3, "cols": 5 },
+  "deck": { "rows": 3, "cols": 5, "buttons": {} },
   "server": {
     "host": "127.0.0.1",
     "port": 8192
   },
   "plugins": {
-    "media_control": { "url": "http://localhost:8888/data" }
+    "media_control": { "url": "http://localhost:8888" }
   }
 }
