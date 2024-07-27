@@ -33,7 +33,7 @@ def _load_module(plugin_name: str, plugins_path: str) -> type[DeckPlugin] | None
         if ext in ("zip", "pyz"):
             sys.path.append(module_path)
 
-            _module = __import__(f"{plugin_name}")
+            _module = __import__(f"{module_name}")
             print(_module)
 
             return _module.Main

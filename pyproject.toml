@@ -10,7 +10,7 @@ python = "^3.11"
 flask = "^3.0.0"
 saaba = { git = "https://github.com/virashu/saaba" }
 requests = "^2.31.0"
-pydeck-shared = {git = "https://github.com/virashu/pydeck_shared"}
+pydeck-shared = { git = "https://github.com/virashu/pydeck_shared" }
 
 
 [build-system]

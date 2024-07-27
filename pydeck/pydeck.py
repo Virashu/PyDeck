@@ -26,8 +26,10 @@ flask.cli.show_server_banner = empty
 
 PATH = __file__.replace("\\", "/").rsplit("/", 1)[0]
 
+ButtonMatrix: t.TypeAlias = dict[ButtonId, DeckButton]
 
-def prep_buttons(obj: dict[ButtonId, DeckButton]) -> dict[str, list[dict[str, t.Any]]]:
+
+def prep_buttons(obj: ButtonMatrix) -> dict[str, list[dict[str, t.Any]]]:
     """Prepare buttons for API response
 
     (Adds id as value in dictionary)"""
@@ -46,14 +48,18 @@ class Deck:
     _actions: dict[str, ActionCallable]
     _variables: dict[str, t.Any]
 
-    buttons: dict[ButtonId, DeckButton]
-    _buttons_base: dict[ButtonId, DeckButton]
-    _buttons_rendered: dict[ButtonId, DeckButton]
+    buttons: ButtonMatrix
+    _buttons_base: ButtonMatrix
+    _buttons_rendered: ButtonMatrix
+
+    _click_events: list[dict[str, t.Any]]
+    _running: bool
+    _plugin_manager: PluginManager
 
     def __init__(self) -> None:
         self._plugin_manager = PluginManager(plugin_dir=f"{PATH}/plugins")
         self._variables = {}
-        self._click_events: list[dict[str, t.Any]] = []
+        self._click_events = []
         self._running = True
 
         # User configurable
@@ -66,9 +72,11 @@ class Deck:
         }
         self.config = config
 
+        fill = False
+
         # Blank dummy buttons
         self._buttons_base = {
-            (x, y): DeckButton(f"{x}:{y}" if False else "")
+            (x, y): DeckButton(f"{x}:{y}" if fill else "")
             for x, y in product(
                 range(self.config["deck"]["rows"]),
                 range(self.config["deck"]["cols"]),
@@ -76,6 +84,13 @@ class Deck:
         }
         # Rendered initialized buttons
         self._buttons_rendered = {}
+
+        for _id in self.buttons:
+            if (
+                _id[0] >= self.config["deck"]["rows"]
+                or _id[1] >= self.config["deck"]["cols"]
+            ):
+                logger.warning("Button id is out of bounds: %s", _id)
 
     def run(self) -> None:
         """Start deck server"""

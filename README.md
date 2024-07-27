@@ -2,13 +2,17 @@
 
 StreamDeck or Macro-Deck copy in python
 
+> [!CAUTION]
+> WIP
+
+
 ## ToDo
 
 - [x] Buttons list --> dicts
 - [x] Plugins list --> dict
 - [ ] GUI API for server configuration
 - [ ] Connection settings
-- [ ] Actions args
+- [x] Actions args
 - [ ] Plugin compilation/bundling (for external packages)
 - [ ] User logs
 
@@ -58,6 +62,11 @@ plugins/
         __init__.py
         other_file.py
 ```
+
+or as a .pyz (.zip) package, that contains dependencies. Example can be found [here](https://github.com/virashu/pydeck_plugin_template) [WIP]
+
+> [!IMPORTANT]
+> Currently, not all libs working well. For example, WinRT package doesn't work.
 
 #### 2.
 

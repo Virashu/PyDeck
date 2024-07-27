@@ -3,6 +3,7 @@
 import logging
 
 from .pydeck import Deck
+from .logging import ColoredFormatter
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 logging.getLogger("flask").setLevel(logging.ERROR)
@@ -10,7 +11,7 @@ logging.getLogger("flask").setLevel(logging.ERROR)
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
-formatter = logging.Formatter("{levelname:<10} {name:<32} {message}", style="{")
+formatter = ColoredFormatter("{levelname:<10} {name:<32} {message}", style="{")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
