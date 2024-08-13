@@ -1,9 +1,9 @@
 import json
 import logging
-import typing as t
-import urllib.error
-import urllib.request
 import time
+import typing as t
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from pydeck_shared.plugin import DeckPlugin
 
@@ -12,34 +12,30 @@ logger = logging.getLogger(__name__)
 
 def _check_connection(url: str):
     try:
-        with urllib.request.urlopen(url, timeout=0.1):
+        with urlopen(url, timeout=0.1):  # noqa: S310
             pass
-    except urllib.error.URLError:
+    except URLError:
         return False
     return True
 
 
 def _get_data(url: str):
     try:
-        with urllib.request.urlopen(url, timeout=0.1) as response:
+        with urlopen(url, timeout=0.1) as response:  # noqa: S310
             contents = response.read()
-    except urllib.error.URLError:
-        return None
-
-    try:
         data = json.loads(contents)
-    except json.JSONDecodeError:
+    except (URLError, json.JSONDecodeError):
         return None
     return data
 
 
 def _post(url: str) -> None:
-    req = urllib.request.Request(
+    req = Request(  # noqa: S310
         url,
         method="GET",
         headers={"Allow-Origin": "*", "Cross-Origin-Resource-Policy": "cross-origin"},
     )
-    with urllib.request.urlopen(req, timeout=1) as response:
+    with urlopen(req, timeout=1) as response:  # noqa: S310
         response.read()
 
 

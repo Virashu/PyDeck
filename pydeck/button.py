@@ -39,7 +39,6 @@ class Button:
 
     def as_dict(self) -> dict[str, t.Any]:
         """Returns properties of a button as dictionary"""
-
         return {
             "text": self.text,
             "text_align": self.text_align,
@@ -55,11 +54,13 @@ class Button:
     def format(self, **kwargs: t.Any) -> None:
         """Format inner text with variables
 
-        Bruh. Use in copies"""
+        Bruh. Use in copies
+        """
         self.text = self.text.format(**kwargs)
 
     def formatted(self, **kwargs: t.Any) -> str:
         """Format inner text with variables
 
-        Returns formatted text"""
+        Returns formatted text
+        """
         return self.text.format(**kwargs)

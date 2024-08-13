@@ -5,15 +5,16 @@ import typing as t
 
 # pylint: disable=unused-argument
 def empty(*args: t.Any, **kwargs: t.Any) -> None:
-    """Dummy function
+    """Dummy function.
 
     Can be used to disable some non-configurable annoying functions
     """
 
 
 def get_path(name: str) -> str:
-    """
-    :param name: file's __name__ attribute
-    """
+    """Get pathname for file.
 
+    Args:
+        name: file's __name__ attribute
+    """
     return name.replace("\\", "/").rsplit("/", 1)[0]

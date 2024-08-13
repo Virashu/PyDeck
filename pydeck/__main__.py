@@ -1,9 +1,9 @@
-"""CLI"""
+"""CLI."""
 
 import logging
 
-from .pydeck import Deck
 from .logging import ColoredFormatter
+from .pydeck import Deck
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 logging.getLogger("flask").setLevel(logging.ERROR)

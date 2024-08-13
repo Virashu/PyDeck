@@ -1,15 +1,17 @@
-"""System plugin
+"""System plugin.
 
 Execute keystrokes
 Run applications
 Control volume
 """
 
-import typing as t
+import logging
 import subprocess
-import warnings
+import typing as t
 
 from pydeck_shared.plugin import DeckPlugin
+
+logger = logging.Logger(__name__)
 
 
 class Main(DeckPlugin):
@@ -29,16 +31,20 @@ class Main(DeckPlugin):
     def update(self) -> None: ...
 
     def _launch_app(self, path: str, capture: bool = False, var_name: str = "") -> None:
-        """
-        path: path to executable
-        can be launched as sub or distinct process
+        """Launch executable.
+
+        Args:
+            path: path of executable
+            capture: whether to capture output
+            var_name: name of variable to save output
         """
         if capture:
             if not var_name:
-                warnings.warn("You should specify a variable name to use capture")
-            res = subprocess.check_output(path.split()).decode("utf-8")
+                logger.warning("You should specify a variable name to use capture")
+                return
+            res = subprocess.check_output(path.split()).decode("utf-8")  # noqa: S603
             self.variables[var_name] = res
 
         else:
-            p = subprocess.Popen(path.split())
+            p = subprocess.Popen(path.split())  # noqa: S603
             del p

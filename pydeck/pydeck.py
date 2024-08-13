@@ -1,4 +1,4 @@
-"""Main module"""
+"""Main module."""
 
 __all__ = ["Deck"]
 
@@ -30,9 +30,10 @@ ButtonMatrix: t.TypeAlias = dict[ButtonId, DeckButton]
 
 
 def prep_buttons(obj: ButtonMatrix) -> dict[str, list[dict[str, t.Any]]]:
-    """Prepare buttons for API response
+    """Prepare buttons for API response.
 
-    (Adds id as value in dictionary)"""
+    (Adds id as value in dictionary)
+    """
     buttons: list[dict[str, t.Any]] = []
     for k, v in obj.items():
         buttons.append({"id": k} | v.as_dict())
@@ -41,7 +42,7 @@ def prep_buttons(obj: ButtonMatrix) -> dict[str, list[dict[str, t.Any]]]:
 
 
 class Deck:
-    """Deck, the main point of the app"""
+    """Deck, the main point of the app."""
 
     config: dict[str, t.Any]
     plugins_config: dict[str, t.Any]
@@ -93,8 +94,7 @@ class Deck:
                 logger.warning("Button id is out of bounds: %s", _id)
 
     def run(self) -> None:
-        """Start deck server"""
-
+        """Start deck server."""
         self._plugin_manager.load()
 
         self._plugin_manager.set_config(self.config["plugins"])
@@ -116,7 +116,6 @@ class Deck:
 
     def update(self) -> None:
         """Update deck"""
-
         self._plugin_manager.update()
 
         while self._click_events:
@@ -136,8 +135,8 @@ class Deck:
             logger.warning("Invalid button_id: %s", str_id)
             return
 
-        tuple_id: ButtonId = tuple(map(int, str_id.split(":")[:2]))  # type: ignore
-        button = self.buttons.get(tuple_id)  # type: ignore
+        tuple_id: ButtonId = tuple(map(int, str_id.split(":")[:2]))  # type: ignore[reportAssignmentType]
+        button = self.buttons.get(tuple_id)
 
         if not button:
             logger.warning("Invalid button_id: %s", str_id)
@@ -160,7 +159,7 @@ class Deck:
         except Exception as e:  # pylint: disable=broad-exception-caught
             # We need to catch plugin-generated exceptions and
             # log them to the user
-            logger.error("Action error: %s", e)
+            logger.error("Action error: %s", e)  # noqa: TRY400
 
     def _run_update_loop(self) -> None:
         while self._running:
@@ -171,18 +170,15 @@ class Deck:
 
         # Test GUI
 
-        @app.get("/")
-        def _a1() -> flask.Response:  # type: ignore
-            return flask.send_from_directory(f"{PATH}/public", "index.html")
-
+        @app.get("/", defaults={"path": "index.html"})
         @app.get("/<path:path>")
-        def _a(path: str) -> flask.Response:  # type: ignore
+        def index(path: str) -> flask.Response:  # type: ignore[reportUnusedFunction]
             return flask.send_from_directory(f"{PATH}/public", path)
 
         # API (Client)
 
         @app.get("/api/<path:path>")
-        def _b(path: str) -> flask.Response:  # type: ignore
+        def api_any(path: str) -> flask.Response:  # type: ignore[reportUnusedFunction]
             if path == "config":
                 logger.info("New connection: %s", flask.request.remote_addr)
                 response = flask.jsonify(self.config)
@@ -195,7 +191,7 @@ class Deck:
             return response
 
         @app.post("/api/event")
-        def _c() -> flask.Response:  # type: ignore
+        def api_event() -> flask.Response:  # type: ignore[reportUnusedFunction]
             json = flask.request.get_json()
             if json.get("type") == "click":
                 self._click_events.append(json.get("data"))
@@ -207,11 +203,11 @@ class Deck:
 
         # API (Server config)
         @app.get("/api/actions_list")
-        def _d() -> flask.Response:  # type: ignore
+        def api_action_list() -> flask.Response:  # type: ignore[reportUnusedFunction]
             return flask.jsonify(list(self._actions.keys()))
 
         @app.get("/api/action_details/<path:path>")
-        def _e(path: str) -> flask.Response:  # type: ignore
+        def api_action(path: str) -> flask.Response:  # type: ignore[reportUnusedFunction]
             if path in self._actions:
                 return flask.jsonify(self._actions[path])
 

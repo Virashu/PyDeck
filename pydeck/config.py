@@ -1,4 +1,4 @@
-"""Loads configuration
+"""Loads configuration.
 
 CONFIG
     Dictionary of loaded configuration (merged with default configuration)
@@ -11,8 +11,8 @@ __all__ = ["config", "defaults"]
 
 
 import json
-import pathlib
 import shutil
+from pathlib import Path
 from typing import Any
 
 default_config: dict[str, Any]
@@ -25,17 +25,17 @@ _DEFAULT_CONFIG_FILE = f"{PATH}/config.default.json"
 _CONFIG_FILE = f"{PATH}/config.json"
 _DEFAULTS_FILE = f"{PATH}/defaults.json"
 
-with open(_DEFAULT_CONFIG_FILE, encoding="utf-8") as f:
+with Path(_DEFAULT_CONFIG_FILE).open() as f:
     default_config = json.load(f)
 
-if not pathlib.Path(_CONFIG_FILE).exists():
+if (config_path := Path(_CONFIG_FILE)).exists():
+    with config_path.open() as f:
+        config = json.load(f)
+else:
     shutil.copy(_DEFAULT_CONFIG_FILE, _CONFIG_FILE)
     config = default_config
-else:
-    with open(_CONFIG_FILE, encoding="utf-8") as f:
-        config = json.load(f)
 
 config = default_config | config
 
-with open(_DEFAULTS_FILE, encoding="utf-8") as f:
+with Path(_DEFAULTS_FILE).open() as f:
     defaults = json.load(f)

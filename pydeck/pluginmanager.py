@@ -21,7 +21,6 @@ PLUGIN_SEP = "__"  # Separator for plugin's variables and methods
 
 
 def _load_module(plugin_name: str, plugins_path: str) -> type[DeckPlugin] | None:
-
     if pathlib.Path(f"{plugins_path}/{plugin_name}").is_dir():
         module_path = f"{plugins_path}/{plugin_name}/__init__.py"
         module_name = plugin_name
@@ -63,7 +62,8 @@ def _load_module(plugin_name: str, plugins_path: str) -> type[DeckPlugin] | None
 class PluginManager:
     """Plugin manager
 
-    Loads plugins"""
+    Loads plugins
+    """
 
     plugins: dict[str, DeckPlugin]
     plugin_dir: str
@@ -74,7 +74,6 @@ class PluginManager:
 
     def load(self) -> None:
         """Load plugins & execute them"""
-
         packages = os.listdir(self.plugin_dir)
 
         for plugin in packages:
@@ -105,7 +104,6 @@ class PluginManager:
 
         config: dict { plugin_name: { setting: value } }
         """
-
         for plugin_name, settings in config.items():
             plugin = self.plugins.get(plugin_name)
 
@@ -114,17 +112,15 @@ class PluginManager:
 
     def update(self) -> None:
         """Update plugins"""
-
         for plugin in self.plugins.values():
             try:
                 plugin.update()
-            except Exception as e:
-                logger.error("Plugin '%s' error: %s", plugin.name, e)
+            except Exception:
+                logger.exception("Plugin '%s' error", plugin.name)
 
     @property
     def variables(self) -> dict[str, t.Any]:
         """Get variables from plugins"""
-
         variables: dict[str, t.Any] = {}
 
         for plugin_id, plugin in self.plugins.items():
@@ -137,7 +133,6 @@ class PluginManager:
     @property
     def actions(self) -> dict[str, t.Any]:
         """Get actions from plugins"""
-
         actions: dict[str, t.Any] = {}
 
         for plugin_id, plugin in self.plugins.items():
