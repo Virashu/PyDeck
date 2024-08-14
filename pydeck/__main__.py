@@ -16,10 +16,14 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-if __name__ == "__main__":
+def main():
     deck = Deck()
 
     try:
         deck.run()
     except KeyboardInterrupt:
         deck.stop()
+
+
+if __name__ == "__main__":
+    main()

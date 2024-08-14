@@ -166,3 +166,5 @@ pydeck/plugins/
 !pydeck/plugins/README.md
 !pydeck/plugins/builtin.py
 !pydeck/plugins/system.py
+
+.ruff_cache

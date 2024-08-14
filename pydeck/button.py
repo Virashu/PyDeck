@@ -38,14 +38,14 @@ class Button:
         self.action_args = action_args or {}
 
     def as_dict(self) -> dict[str, t.Any]:
-        """Returns properties of a button as dictionary"""
+        """Return properties of a button as dictionary"""
         return {
             "text": self.text,
             "text_align": self.text_align,
             "font_family": self.font_family,
             "font_size": self.font_size,
-            "action": self.action,
-            "action_args": self.action_args,
+            # "action": self.action,
+            # "action_args": self.action_args,
         }
 
     def __repr__(self):

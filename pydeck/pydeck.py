@@ -14,7 +14,7 @@ import flask
 
 from pydeck.button import Button as DeckButton
 from pydeck.config import config
-from pydeck.pluginmanager import PluginManager
+from pydeck.pluginmanager import PLUGIN_SEP, PluginManager
 from pydeck.typing import ActionCallable, ButtonId
 from pydeck.utils import empty
 
@@ -24,21 +24,18 @@ logger.setLevel(logging.INFO)
 # Disable banner (cannot be done other way :( )
 flask.cli.show_server_banner = empty
 
-PATH = __file__.replace("\\", "/").rsplit("/", 1)[0]
+PATH: str = __file__.replace("\\", "/").rsplit("/", 1)[0]
+ROOT: str = PATH.rsplit("/", 1)[0]
 
 ButtonMatrix: t.TypeAlias = dict[ButtonId, DeckButton]
 
 
-def prep_buttons(obj: ButtonMatrix) -> dict[str, list[dict[str, t.Any]]]:
-    """Prepare buttons for API response.
+def buttons_as_list(obj: ButtonMatrix) -> list[dict[str, t.Any]]:
+    """Return buttons as list.
 
-    (Adds id as value in dictionary)
+    Adds `id` property
     """
-    buttons: list[dict[str, t.Any]] = []
-    for k, v in obj.items():
-        buttons.append({"id": k} | v.as_dict())
-
-    return {"buttons": buttons}
+    return [{"id": k} | v.as_dict() for k, v in obj.items()]
 
 
 class Deck:
@@ -73,11 +70,11 @@ class Deck:
         }
         self.config = config
 
-        fill = False
+        fill = True
 
         # Blank dummy buttons
         self._buttons_base = {
-            (x, y): DeckButton(f"{x}:{y}" if fill else "")
+            (x, y): DeckButton("&nbsp;" if fill else "")
             for x, y in product(
                 range(self.config["deck"]["rows"]),
                 range(self.config["deck"]["cols"]),
@@ -123,10 +120,12 @@ class Deck:
 
         self._variables.update(self._plugin_manager.variables)
 
-        self._buttons_rendered = copy.deepcopy(self.buttons)
+        temp_render = copy.deepcopy(self.buttons)
 
-        for button in self._buttons_rendered.values():
+        for button in temp_render.values():
             button.format(**self._variables)
+
+        self._buttons_rendered = temp_render
 
     def _handle_click(self, json: dict[str, t.Any]) -> None:
         str_id = json.get("button_id")
@@ -136,7 +135,7 @@ class Deck:
             return
 
         tuple_id: ButtonId = tuple(map(int, str_id.split(":")[:2]))  # type: ignore[reportAssignmentType]
-        button = self.buttons.get(tuple_id)
+        button: DeckButton | None = self.buttons.get(tuple_id)
 
         if not button:
             logger.warning("Invalid button_id: %s", str_id)
@@ -156,10 +155,11 @@ class Deck:
 
         try:
             action_callable(**button.action_args)
-        except Exception as e:  # pylint: disable=broad-exception-caught
+        except Exception:  # pylint: disable=broad-exception-caught
             # We need to catch plugin-generated exceptions and
             # log them to the user
-            logger.error("Action error: %s", e)  # noqa: TRY400
+            plugin_name: str = button.action.split(PLUGIN_SEP)[0]
+            logger.exception("Plugin '%s' action error", plugin_name)
 
     def _run_update_loop(self) -> None:
         while self._running:
@@ -173,7 +173,7 @@ class Deck:
         @app.get("/", defaults={"path": "index.html"})
         @app.get("/<path:path>")
         def index(path: str) -> flask.Response:  # type: ignore[reportUnusedFunction]
-            return flask.send_from_directory(f"{PATH}/public", path)
+            return flask.send_from_directory(f"{ROOT}/public", path)
 
         # API (Client)
 
@@ -183,7 +183,11 @@ class Deck:
                 logger.info("New connection: %s", flask.request.remote_addr)
                 response = flask.jsonify(self.config)
             elif path == "buttons":
-                buttons = prep_buttons(self._buttons_base | self._buttons_rendered)
+                buttons = buttons_as_list(self._buttons_base | self._buttons_rendered)
+
+                response = flask.jsonify(buttons)
+            elif path == "buttons_nonblank":
+                buttons = buttons_as_list(self._buttons_rendered)
                 response = flask.jsonify(buttons)
             else:
                 response = flask.Response()

@@ -10,7 +10,7 @@ from pydeck_shared.plugin import DeckPlugin
 logger = logging.getLogger(__name__)
 
 
-def _check_connection(url: str):
+def _check_connection(url: str) -> bool:
     try:
         with urlopen(url, timeout=0.1):  # noqa: S310
             pass
@@ -19,7 +19,7 @@ def _check_connection(url: str):
     return True
 
 
-def _get_data(url: str):
+def _get_data(url: str) -> dict[str, t.Any] | None:
     try:
         with urlopen(url, timeout=0.1) as response:  # noqa: S310
             contents = response.read()

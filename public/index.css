@@ -57,7 +57,7 @@
 .deck-button-container {
   --content-width: 80vw;
 
-  --gutter: 1em;
+  --gap: 1em;
 
   /* --row-size: calc(
     (var(--content-width) - (var(--gutter) * (var(--columns) - 1))) /
@@ -71,16 +71,20 @@
 
   grid-auto-rows: var(--row-size);
 
-  grid-column-gap: var(--gutter);
-  grid-row-gap: var(--gutter);
+  grid-column-gap: var(--gap);
+  grid-row-gap: var(--gap);
 
   --row-size: calc(
-    (var(--content-width) - ((var(--deck-columns)-1) * var(--gutter))) /
-      var(--deck-columns)
+    (
+      var(--content-width) - (
+        ( var(--deck-cols) - 1 ) * var(--gap)
+      )
+    ) / var(--deck-cols)
   );
 
-  grid-template-columns: repeat(var(--deck-columns), 1fr);
+  grid-template-columns: repeat(var(--deck-cols), var(--row-size));
   grid-template-rows: repeat(var(--deck-rows), var(--row-size));
+
   align-items: stretch;
   justify-items: stretch;
 
@@ -88,7 +92,6 @@
 
   min-width: 0;
   min-height: 0;
-
 
   box-sizing: border-box;
 }
@@ -106,6 +109,9 @@
   height: 100%;
   min-width: 0;
   min-height: 0; */
+
+  width: 100%;
+  flex: 0 0 auto;
 
   overflow: hidden;
 
