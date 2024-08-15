@@ -11,7 +11,7 @@ import typing as t
 
 from pydeck_shared.plugin import DeckPlugin
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Main(DeckPlugin):
@@ -30,7 +30,9 @@ class Main(DeckPlugin):
     @t.final
     def update(self) -> None: ...
 
-    def _launch_app(self, path: str, capture: bool = False, var_name: str = "") -> None:
+    def _launch_app(
+        self, path: str, *, capture: bool = False, var_name: str = ""
+    ) -> None:
         """Launch executable.
 
         Args:

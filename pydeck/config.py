@@ -7,8 +7,9 @@ DEFAULTS
     Default values for some objects. Not to be confused with default config
 """
 
-__all__ = ["config", "defaults"]
+from __future__ import annotations
 
+__all__ = ["config", "defaults"]
 
 import json
 import shutil

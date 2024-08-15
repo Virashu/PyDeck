@@ -10,7 +10,7 @@ repos:
     rev: v0.4.8
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix, --exit-non-zero-on-fix, --ignore=FIX]
       - id: ruff-format
 
   - repo: https://github.com/codespell-project/codespell

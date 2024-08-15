@@ -1,5 +1,7 @@
 """Plugin manager"""
 
+from __future__ import annotations
+
 import importlib.util
 import logging
 import os
@@ -7,9 +9,10 @@ import pathlib
 import sys
 import typing as t
 
-from pydeck_shared import DeckPlugin
-
 from .utils import get_path
+
+if t.TYPE_CHECKING:
+    from pydeck_shared import DeckPlugin
 
 libs_path = get_path(__file__) + "/plugin_libs"
 sys.path.append(libs_path)
@@ -33,7 +36,6 @@ def _load_module(plugin_name: str, plugins_path: str) -> type[DeckPlugin] | None
             sys.path.append(module_path)
 
             _module = __import__(f"{module_name}")
-            print(_module)
 
             return _module.Main
 
@@ -115,7 +117,7 @@ class PluginManager:
         for plugin in self.plugins.values():
             try:
                 plugin.update()
-            except Exception:
+            except Exception:  # noqa: PERF203
                 logger.exception("Plugin '%s' error", plugin.name)
 
     @property
@@ -125,7 +127,7 @@ class PluginManager:
 
         for plugin_id, plugin in self.plugins.items():
             variables.update(
-                {f"{plugin_id}{PLUGIN_SEP}{k}": v for k, v in plugin.variables.items()}
+                {f"{plugin_id}{PLUGIN_SEP}{k}": v for k, v in plugin.variables.items()},
             )
 
         return variables
@@ -137,7 +139,7 @@ class PluginManager:
 
         for plugin_id, plugin in self.plugins.items():
             actions.update(
-                {f"{plugin_id}{PLUGIN_SEP}{k}": v for k, v in plugin.actions.items()}
+                {f"{plugin_id}{PLUGIN_SEP}{k}": v for k, v in plugin.actions.items()},
             )
 
         return actions

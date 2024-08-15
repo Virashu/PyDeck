@@ -10,7 +10,7 @@ class Main(DeckPlugin):
     author = "Virashu"
 
     @t.final
-    def load(self):
+    def load(self) -> None:
         self.variables = {"time": self._get_time()}
 
     @t.final
@@ -18,4 +18,4 @@ class Main(DeckPlugin):
         self.variables = {"time": self._get_time()}
 
     def _get_time(self) -> str:
-        return datetime.datetime.now().strftime("%H:%M:%S")
+        return datetime.datetime.now().strftime("%H:%M:%S")  # noqa: DTZ005

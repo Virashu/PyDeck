@@ -1,5 +1,7 @@
 """Main module."""
 
+from __future__ import annotations
+
 __all__ = ["Deck"]
 
 import copy
@@ -165,7 +167,7 @@ class Deck:
         while self._running:
             self.update()
 
-    def _run_web_interface(self) -> None:
+    def _run_web_interface(self) -> None:  # noqa: C901
         app = flask.Flask(__name__)
 
         # Test GUI

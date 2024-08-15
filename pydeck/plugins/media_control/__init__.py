@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import time
@@ -47,7 +49,7 @@ class Main(DeckPlugin):
     plugin_id = "media_control"
 
     @t.final
-    def load(self):
+    def load(self) -> None:
         self.variables = {
             "title": "",
             "artist": "",
@@ -93,11 +95,11 @@ class Main(DeckPlugin):
     def _control(self, action: str) -> None:
         _post(self.config["url"] + "/control/" + action)
 
-    def _toggle_pause(self):
+    def _toggle_pause(self) -> None:
         self._control("pause")
 
-    def _next(self):
+    def _next(self) -> None:
         self._control("next")
 
-    def _prev(self):
+    def _prev(self) -> None:
         self._control("prev")

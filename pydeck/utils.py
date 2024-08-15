@@ -1,10 +1,9 @@
 __all__ = ["empty", "get_path"]
 
-import typing as t
+from typing import Any
 
 
-# pylint: disable=unused-argument
-def empty(*args: t.Any, **kwargs: t.Any) -> None:
+def empty(*args: Any, **kwargs: Any) -> None:  # noqa: ANN401,ARG001
     """Dummy function.
 
     Can be used to disable some non-configurable annoying functions

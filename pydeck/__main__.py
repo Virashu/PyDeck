@@ -16,7 +16,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-def main():
+def main() -> None:
     deck = Deck()
 
     try:
